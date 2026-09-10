@@ -686,11 +686,11 @@ export const ShiftReportView: React.FC = () => {
             <div className="p-3.5 rounded-xl bg-[#0f172a] border border-[#334155] text-xs space-y-1 font-mono text-left min-w-[240px]">
               <div className="flex justify-between gap-4">
                 <span className="text-slate-400">تاريخ الدورية:</span>
-                <span className="text-white font-bold">{activeShiftLog.date}</span>
+                <span className="text-white font-bold">{activeShiftLog.date || '2026-09-08'}</span>
               </div>
               <div className="flex justify-between gap-4">
                 <span className="text-slate-400">الدورية:</span>
-                <span className="text-blue-400 font-bold">{activeShiftLog.shiftName.split('(')[0]}</span>
+                <span className="text-blue-400 font-bold">{(activeShiftLog.shiftName || 'الوردية الأولى (الصباحية)').split('(')[0]}</span>
               </div>
               <div className="flex justify-between gap-4">
                 <span className="text-slate-400">مهندس الدورية المسؤول:</span>
@@ -1041,7 +1041,7 @@ export const ShiftReportView: React.FC = () => {
                   خطوط الإنتاج والطباعة المفحوصة خلال هذه الدورية:
                 </span>
                 <div className="flex flex-wrap gap-2">
-                  {activeShiftLog.productionLinesInspected.map((line, idx) => (
+                  {(activeShiftLog.productionLinesInspected || []).map((line, idx) => (
                     <span
                       key={idx}
                       className="px-2.5 py-1 rounded bg-[#1e293b] border border-[#334155] text-xs font-mono text-slate-200"
@@ -1341,7 +1341,7 @@ export const ShiftReportView: React.FC = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {activeShiftLog.linkedMeterReadings.map((reading, idx) => (
+                {(activeShiftLog.linkedMeterReadings || []).map((reading, idx) => (
                   <div
                     key={idx}
                     className="p-3.5 rounded-xl bg-[#0f172a] border border-[#334155] hover:border-cyan-500/40 transition-colors space-y-2 text-xs"
@@ -1453,7 +1453,7 @@ export const ShiftReportView: React.FC = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {activeShiftLog.customEnvironmentalParams.map((param) => (
+                {(activeShiftLog.customEnvironmentalParams || []).map((param) => (
                   <div
                     key={param.id}
                     className="p-3.5 rounded-xl bg-[#0f172a] border border-[#334155] hover:border-emerald-500/40 transition-colors space-y-2 text-xs"

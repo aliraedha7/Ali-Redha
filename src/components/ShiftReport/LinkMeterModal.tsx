@@ -64,7 +64,7 @@ export const LinkMeterModal: React.FC<LinkMeterModalProps> = ({
       const v = value;
       if (
         (selectedParam.criticalMax !== undefined && v >= selectedParam.criticalMax) ||
-        (selectedParam.criticalMin !== undefined && v <= selectedParam.criticalMin)
+        ((selectedParam as any).criticalMin !== undefined && v <= (selectedParam as any).criticalMin)
       ) {
         setStatus('CRITICAL');
       } else if (

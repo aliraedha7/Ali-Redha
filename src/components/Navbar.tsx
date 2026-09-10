@@ -49,7 +49,10 @@ export const Navbar: React.FC = () => {
     notifications,
     dismissNotification,
     globalSearch,
-    setGlobalSearch
+    setGlobalSearch,
+    isPhpConnected,
+    downloadPhpPackage,
+    exportDatabaseJson
   } = useCMMS();
 
   const [currentTime, setCurrentTime] = useState<string>('');
@@ -343,14 +346,15 @@ export const Navbar: React.FC = () => {
             />
           </div>
 
-          {/* PHP & MySQL Package Modal Toggle */}
+          {/* PHP Hosting Package Modal Toggle */}
           <button
             onClick={() => setShowPhpModal(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold transition-colors shadow-sm"
-            title="حزمة نظام PHP & MySQL الكاملة"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold transition-colors shadow-sm"
+            title="حزمة نظام PHP للاستضافة الخارجية (cPanel)"
           >
-            <FileCode className="w-4 h-4 text-emerald-400" />
-            <span className="hidden sm:inline">نسخة PHP & MySQL</span>
+            <Server className="w-4 h-4 text-emerald-400" />
+            <span className="hidden sm:inline">حزمة PHP للاستضافة</span>
+            <span className={`w-2 h-2 rounded-full ${isPhpConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} title={isPhpConnected ? 'متصل بسيرفر PHP' : 'حزمة PHP جاهزة للتحميل'} />
           </button>
 
           {/* Notifications Dropdown Toggle */}
@@ -440,7 +444,7 @@ export const Navbar: React.FC = () => {
             <div className="flex items-center justify-between border-b border-[#334155] pb-3">
               <div className="flex items-center gap-2">
                 <Server className="w-5 h-5 text-emerald-400" />
-                <h3 className="text-base font-bold text-white">حزمة نظام إدارة الصيانة بلغة PHP & HTML5 & MySQL</h3>
+                <h3 className="text-base font-bold text-white">حزمة نظام إدارة الصيانة الكاملة للاستضافة الخارجية (PHP / cPanel)</h3>
               </div>
               <button 
                 onClick={() => setShowPhpModal(false)}
@@ -450,48 +454,80 @@ export const Navbar: React.FC = () => {
               </button>
             </div>
 
-            <div className="space-y-3 text-xs leading-relaxed">
-              <p className="text-slate-300">
-                تمت برمجة وإعداد النسخة الكاملة والمستقلة للنظام بلغة <strong className="text-emerald-400">PHP 7.4/8+ و HTML5 وقاعدة بيانات MySQL</strong> مع الحفاظ على كافة الماكينات، أوامر العمل، محطات الخدمات، وتقارير الدوريات داخل مجلد <code className="bg-slate-900 px-2 py-0.5 rounded text-emerald-300 font-mono">/php_cmms/</code>.
-              </p>
+            <div className="space-y-4 text-xs leading-relaxed">
+              <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-500/30 flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className={`w-3 h-3 rounded-full ${isPhpConnected ? 'bg-emerald-400 shadow-[0_0_8px_#34d399]' : 'bg-emerald-500'}`} />
+                  <div>
+                    <div className="text-emerald-300 font-bold text-sm">
+                      {isPhpConnected ? 'متصل بخادم PHP نشط ومُزامن بالكامل' : 'حزمة PHP جاهزة للرفع المباشر على cPanel أو أي استضافة خارجية'}
+                    </div>
+                    <div className="text-slate-400 text-[11px]">
+                      تعمل على PHP 7.4 و 8.x ولا تتطلب Node.js أو Vite على السيرفر الخارجي
+                    </div>
+                  </div>
+                </div>
+                <span className="px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300 font-mono text-[11px] font-bold border border-emerald-500/40">
+                  PHP 8.x Ready
+                </span>
+              </div>
+
+              {/* Direct Download & Export Action Buttons */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button
+                  onClick={downloadPhpPackage}
+                  className="flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>تحميل حزمة PHP الجاهزة (.ZIP فوراً)</span>
+                </button>
+                <button
+                  onClick={exportDatabaseJson}
+                  className="flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl bg-blue-600/30 hover:bg-blue-600/50 text-blue-200 border border-blue-500/40 font-bold text-xs shadow-md transition-all hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <FileCode className="w-4 h-4 text-blue-400" />
+                  <span>تصدير قاعدة البيانات الحالية (JSON)</span>
+                </button>
+              </div>
 
               <div className="p-3.5 rounded-xl bg-[#0f172a] border border-[#334155] space-y-2">
                 <div className="font-bold text-white flex items-center gap-1.5">
-                  <Download className="w-4 h-4 text-blue-400" />
-                  <span>طريقة تحميل وتشغيل حزمة PHP:</span>
+                  <Server className="w-4 h-4 text-emerald-400" />
+                  <span>طريقة الرفع والتشغيل على cPanel أو سيرفر الويب (دقيقتين فقط):</span>
                 </div>
-                <ol className="list-decimal list-inside space-y-1 text-slate-300 pr-2">
-                  <li>من قائمة الإعدادات أعلى الشاشة، اختر <strong>Export as ZIP</strong> لتحميل المشروع بالكامل.</li>
-                  <li>ستجد مجلد <code className="text-emerald-300 font-mono">php_cmms</code> جاهزاً للنقل إلى سيرفر محلي (XAMPP / WAMP) أو استضافة cPanel.</li>
-                  <li>يتضمن المجلد ملف <code className="text-amber-300 font-mono">database/schema.sql</code> لاستيراده بنقرة واحدة في phpMyAdmin.</li>
-                  <li>كما يحتوي على محرك تخزين تلقائي (Fallback) يتيح تشغيله فوراً حتى بدون ربط قاعدة بيانات عبر الأمر: <code className="text-blue-300 font-mono">php -S localhost:8000</code>.</li>
+                <ol className="list-decimal list-inside space-y-1.5 text-slate-300 pr-2">
+                  <li>اضغط على زر <strong>تحميل حزمة PHP الجاهزة (.ZIP)</strong> أعلاه لحفظ ملف <code className="text-emerald-300 font-mono">cmms_almorjan_php_package.zip</code>.</li>
+                  <li>ادخل إلى لوحة تحكم الاستضافة (cPanel أو غيرها) وافتح <strong>File Manager (إدارة الملفات)</strong>.</li>
+                  <li>انتقل إلى مجلد <code className="text-amber-300 font-mono">public_html</code> وارفع الملف المضغوط ثم اضغط بالزر الأيمن واختر <strong>Extract</strong>.</li>
+                  <li>افتح رابط موقعك مباشرة؛ سيعمل التطبيق فوراً وبسرعة فائقة بكافة الـ 41 ماكينة والصالات والرسوميات وقاعدة البيانات المشتركة <code className="text-emerald-300 font-mono">data_store.json</code>!</li>
                 </ol>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
-                <div className="p-2 rounded-lg bg-slate-800/60 border border-slate-700">
-                  <span className="block text-slate-400 text-[10px]">الملف الرئيسي</span>
-                  <span className="font-mono font-bold text-white text-[11px]">index.php</span>
+                <div className="p-2.5 rounded-lg bg-slate-800/60 border border-slate-700">
+                  <span className="block text-slate-400 text-[10px]">المدخل الرئيسي</span>
+                  <span className="font-mono font-bold text-emerald-400 text-[11px]">index.php</span>
                 </div>
-                <div className="p-2 rounded-lg bg-slate-800/60 border border-slate-700">
-                  <span className="block text-slate-400 text-[10px]">أوامر العمل</span>
-                  <span className="font-mono font-bold text-white text-[11px]">work_orders.php</span>
+                <div className="p-2.5 rounded-lg bg-slate-800/60 border border-slate-700">
+                  <span className="block text-slate-400 text-[10px]">واجهة الحفظ</span>
+                  <span className="font-mono font-bold text-blue-400 text-[11px]">api.php</span>
                 </div>
-                <div className="p-2 rounded-lg bg-slate-800/60 border border-slate-700">
-                  <span className="block text-slate-400 text-[10px]">محضر الدوريات</span>
-                  <span className="font-mono font-bold text-white text-[11px]">shift_reports.php</span>
-                </div>
-                <div className="p-2 rounded-lg bg-slate-800/60 border border-slate-700">
+                <div className="p-2.5 rounded-lg bg-slate-800/60 border border-slate-700">
                   <span className="block text-slate-400 text-[10px]">قاعدة البيانات</span>
-                  <span className="font-mono font-bold text-emerald-400 text-[11px]">schema.sql</span>
+                  <span className="font-mono font-bold text-amber-400 text-[11px]">data_store.json</span>
+                </div>
+                <div className="p-2.5 rounded-lg bg-slate-800/60 border border-slate-700">
+                  <span className="block text-slate-400 text-[10px]">توجيه السيرفر</span>
+                  <span className="font-mono font-bold text-purple-400 text-[11px]">.htaccess</span>
                 </div>
               </div>
             </div>
 
-            <div className="pt-3 border-t border-[#334155] flex justify-end">
+            <div className="pt-3 border-t border-[#334155] flex items-center justify-between">
+              <span className="text-[11px] text-slate-400">معمل المرجان للطباعة والتغليف — إشراف م. علي رضا</span>
               <button 
                 onClick={() => setShowPhpModal(false)}
-                className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md shadow-blue-600/20"
+                className="px-5 py-2 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs"
               >
                 إغلاق النافذة
               </button>

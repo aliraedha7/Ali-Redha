@@ -21,7 +21,13 @@ import {
   X,
   FileSpreadsheet,
   Layers,
-  Award
+  Award,
+  Server,
+  Download,
+  FileCode,
+  HardDrive,
+  Database,
+  Globe
 } from 'lucide-react';
 import { useCMMS } from '../../context/CMMSContext';
 import { UserAccount, UserRole, UserPermissions } from '../../types';
@@ -37,12 +43,20 @@ export const DeveloperHub: React.FC = () => {
     toggleUserStatus,
     canAccess,
     setIsLoginModalOpen,
-    requestDeleteConfirmation
+    requestDeleteConfirmation,
+    isPhpConnected,
+    downloadPhpPackage,
+    exportDatabaseJson,
+    assets,
+    hangars,
+    pmPlans,
+    spareParts,
+    meterDevices
   } = useCMMS();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('ALL');
-  const [activeSubTab, setActiveSubTab] = useState<'ACCOUNTS' | 'MATRIX' | 'AUDIT'>('ACCOUNTS');
+  const [activeSubTab, setActiveSubTab] = useState<'ACCOUNTS' | 'MATRIX' | 'PHP_HOSTING'>('ACCOUNTS');
 
   // Filtered users
   const filteredUsers = users.filter((u) => {
@@ -230,6 +244,19 @@ export const DeveloperHub: React.FC = () => {
           >
             <FileSpreadsheet className="w-4 h-4" />
             <span>مصفوفة الصلاحيات الموحدة (Permissions Matrix)</span>
+          </button>
+
+          <button
+            onClick={() => setActiveSubTab('PHP_HOSTING')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
+              activeSubTab === 'PHP_HOSTING'
+                ? 'bg-emerald-600/20 text-emerald-400 border border-emerald-500/40'
+                : 'text-slate-400 hover:text-white hover:bg-[#1e293b]'
+            }`}
+          >
+            <Server className="w-4 h-4 text-emerald-400" />
+            <span>الاستضافة الخارجية وحزمة PHP (cPanel)</span>
+            <span className={`w-2 h-2 rounded-full ${isPhpConnected ? 'bg-emerald-400 animate-pulse' : 'bg-emerald-500'}`} />
           </button>
         </div>
 
@@ -634,6 +661,176 @@ export const DeveloperHub: React.FC = () => {
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* Sub-Tab 3: PHP External Hosting & Deployment Package */}
+      {activeSubTab === 'PHP_HOSTING' && (
+        <div className="space-y-6">
+          {/* Server Connection Status Banner */}
+          <div className="p-6 rounded-2xl bg-gradient-to-r from-emerald-950/50 via-[#1e293b] to-[#1e293b] border border-emerald-500/30 shadow-xl relative overflow-hidden">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative z-10">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shadow-inner">
+                  <Server className="w-7 h-7" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-black text-white">حزمة نظام إدارة الصيانة المحوسب (PHP Standalone Package)</span>
+                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-mono">
+                      v2.5 Production Ready
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
+                    هذه الحزمة مجهزة بالكامل للعمل على أي سيرفر ويب خارجي يدعم <strong className="text-emerald-400">PHP 7.4 أو PHP 8.x</strong> (مثل cPanel، Hostinger، Apache، LiteSpeed، Nginx) دون الحاجة لتثبيت Node.js أو Vite على السيرفر المستضيف!
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 w-full md:w-auto">
+                <button
+                  onClick={downloadPhpPackage}
+                  className="flex-1 md:flex-initial flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-600/30 transition-all hover:scale-105 active:scale-95"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>تحميل حزمة PHP الجاهزة (.ZIP)</span>
+                </button>
+                <button
+                  onClick={exportDatabaseJson}
+                  className="flex-1 md:flex-initial flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[#334155] hover:bg-slate-600 text-white font-bold text-xs border border-slate-600 transition-all hover:scale-105 active:scale-95"
+                >
+                  <FileCode className="w-4 h-4 text-amber-400" />
+                  <span>تصدير نسخة JSON</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Database & System Scope Metrics */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            <div className="p-4 rounded-xl bg-[#1e293b] border border-[#334155] text-center space-y-1">
+              <span className="text-[11px] text-slate-400 font-bold block">الأصول والماكينات</span>
+              <span className="text-xl font-black text-white font-mono">{assets.length}</span>
+              <span className="text-[10px] text-emerald-400 block">41 ماكينة إنتاجية</span>
+            </div>
+
+            <div className="p-4 rounded-xl bg-[#1e293b] border border-[#334155] text-center space-y-1">
+              <span className="text-[11px] text-slate-400 font-bold block">صالات الإنتاج</span>
+              <span className="text-xl font-black text-white font-mono">{hangars.length}</span>
+              <span className="text-[10px] text-blue-400 block">9 صالات مجهزة</span>
+            </div>
+
+            <div className="p-4 rounded-xl bg-[#1e293b] border border-[#334155] text-center space-y-1">
+              <span className="text-[11px] text-slate-400 font-bold block">خطط الصيانة</span>
+              <span className="text-xl font-black text-white font-mono">{pmPlans.length}</span>
+              <span className="text-[10px] text-amber-400 block">خطط دورية معتمدة</span>
+            </div>
+
+            <div className="p-4 rounded-xl bg-[#1e293b] border border-[#334155] text-center space-y-1">
+              <span className="text-[11px] text-slate-400 font-bold block">أجهزة القياس</span>
+              <span className="text-xl font-black text-white font-mono">{meterDevices.length}</span>
+              <span className="text-[10px] text-purple-400 block">عدادات حرارة وساعات</span>
+            </div>
+
+            <div className="p-4 rounded-xl bg-[#1e293b] border border-[#334155] text-center space-y-1">
+              <span className="text-[11px] text-slate-400 font-bold block">قطع الغيار</span>
+              <span className="text-xl font-black text-white font-mono">{spareParts.length}</span>
+              <span className="text-[10px] text-cyan-400 block">أصناف متتبعة</span>
+            </div>
+
+            <div className="p-4 rounded-xl bg-[#1e293b] border border-[#334155] text-center space-y-1">
+              <span className="text-[11px] text-slate-400 font-bold block">حسابات النظام</span>
+              <span className="text-xl font-black text-white font-mono">{users.length}</span>
+              <span className="text-[10px] text-emerald-400 block">صلاحيات مخصصة</span>
+            </div>
+          </div>
+
+          {/* Detailed Deployment Instructions */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="p-5 rounded-2xl bg-[#1e293b] border border-[#334155] space-y-4">
+              <div className="flex items-center gap-2 text-base font-bold text-white border-b border-[#334155] pb-3">
+                <Globe className="w-5 h-5 text-blue-400" />
+                <h3>خطوات رفع الحزمة على استضافة cPanel (دقيقتين فقط):</h3>
+              </div>
+
+              <div className="space-y-3 text-xs leading-relaxed text-slate-300">
+                <div className="flex items-start gap-3 p-3 rounded-xl bg-[#0f172a] border border-slate-800">
+                  <span className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0 font-mono">1</span>
+                  <div>
+                    <strong className="text-white block mb-0.5">تحميل الملف المضغوط:</strong>
+                    انقر فوق الزر الأخضر <strong>"تحميل حزمة PHP الجاهزة (.ZIP)"</strong> لحفظ ملف <code className="text-emerald-300 font-mono">cmms_almorjan_php_package.zip</code> على جهازك.
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 p-3 rounded-xl bg-[#0f172a] border border-slate-800">
+                  <span className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0 font-mono">2</span>
+                  <div>
+                    <strong className="text-white block mb-0.5">الدخول إلى إدارة الملفات (File Manager):</strong>
+                    ادخل إلى لوحة تحكم cPanel الخاصة باستضافتك، ثم افتح <strong>File Manager</strong> وانتقل إلى مجلد <code className="text-amber-300 font-mono">public_html</code> (أو مجلد فرعي تفضله مثل <code className="text-slate-400 font-mono">cmms</code>).
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 p-3 rounded-xl bg-[#0f172a] border border-slate-800">
+                  <span className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0 font-mono">3</span>
+                  <div>
+                    <strong className="text-white block mb-0.5">رفع وفك الضغط:</strong>
+                    ارفع ملف <code className="text-emerald-300 font-mono">cmms_almorjan_php_package.zip</code>، ثم اضغط بالزر الأيمن على الملف واختر <strong>Extract (فك الضغط)</strong>.
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 p-3 rounded-xl bg-[#0f172a] border border-slate-800">
+                  <span className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs shrink-0 font-mono">4</span>
+                  <div>
+                    <strong className="text-white block mb-0.5">التشغيل المباشر:</strong>
+                    افتح دومين موقعك أو الرابط في المتصفح، وسيبدأ النظام بالعمل فوراً بكافة الواجهات التفاعلية والرسوميات، ويتم حفظ أوامر العمل والبيانات تلقائياً على السيرفر!
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-[#1e293b] border border-[#334155] space-y-4">
+              <div className="flex items-center gap-2 text-base font-bold text-white border-b border-[#334155] pb-3">
+                <HardDrive className="w-5 h-5 text-emerald-400" />
+                <h3>المواصفات التقنية ومكونات الحزمة:</h3>
+              </div>
+
+              <div className="space-y-2.5 text-xs text-slate-300">
+                <div className="flex items-center justify-between p-2.5 rounded-lg bg-[#0f172a] border border-slate-800">
+                  <span className="text-slate-400">إصدار PHP المدعوم:</span>
+                  <span className="font-mono font-bold text-emerald-400">PHP 7.4 / 8.0 / 8.1 / 8.2 / 8.3</span>
+                </div>
+
+                <div className="flex items-center justify-between p-2.5 rounded-lg bg-[#0f172a] border border-slate-800">
+                  <span className="text-slate-400">ملف البداية (Entrypoint):</span>
+                  <span className="font-mono font-bold text-white">index.php</span>
+                </div>
+
+                <div className="flex items-center justify-between p-2.5 rounded-lg bg-[#0f172a] border border-slate-800">
+                  <span className="text-slate-400">واجهة الحفظ البرمجية (REST API):</span>
+                  <span className="font-mono font-bold text-blue-400">api.php (JSON Auto-Persistence)</span>
+                </div>
+
+                <div className="flex items-center justify-between p-2.5 rounded-lg bg-[#0f172a] border border-slate-800">
+                  <span className="text-slate-400">قاعدة البيانات السحابية المركزية:</span>
+                  <span className="font-mono font-bold text-amber-400">data_store.json (Shared Storage)</span>
+                </div>
+
+                <div className="flex items-center justify-between p-2.5 rounded-lg bg-[#0f172a] border border-slate-800">
+                  <span className="text-slate-400">تكوين خادم Apache / cPanel:</span>
+                  <span className="font-mono font-bold text-purple-400">.htaccess (Deflate + UTF-8 + Rewrite)</span>
+                </div>
+
+                <div className="flex items-center justify-between p-2.5 rounded-lg bg-[#0f172a] border border-slate-800">
+                  <span className="text-slate-400">متطلبات Node.js / NPM على الاستضافة:</span>
+                  <span className="font-bold text-emerald-300">غير مطلوبة نهائياً (0% Dependency)</span>
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-emerald-950/30 border border-emerald-500/20 text-emerald-200 text-[11px] leading-relaxed">
+                💡 <strong>ملاحظة أمان وتوافق:</strong> تم تصميم النظام بحيث يتم تحميل البيانات الأولية فورياً من خادم PHP أثناء فتح الصفحة دون أي تأخير، كما يتم إرسال أي تعديل يجريه المستخدم في المتصفح إلى <code className="bg-slate-900 px-1.5 py-0.5 rounded text-emerald-300 font-mono">api.php</code> لحفظه داخل قاعدة بيانات السيرفر بشكل فوري ودائم.
+              </div>
+            </div>
           </div>
         </div>
       )}

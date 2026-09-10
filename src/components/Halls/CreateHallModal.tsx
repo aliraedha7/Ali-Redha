@@ -37,7 +37,7 @@ export const CreateHallModal: React.FC = () => {
   const [description, setDescription] = useState('');
   const [supervisor, setSupervisor] = useState('م. علي رضا');
   const [dedicatedUpsName, setDedicatedUpsName] = useState('');
-  const [iconType, setIconType] = useState('printer');
+  const [iconType, setIconType] = useState<"printer" | "film" | "package" | "gauge" | "zap" | "flame" | "layers" | "wind" | "tool">('printer');
   const [error, setError] = useState<string | null>(null);
 
   if (!isCreateHallOpen) return null;
@@ -153,7 +153,7 @@ export const CreateHallModal: React.FC = () => {
               <select
                 id="hall-icon-select"
                 value={iconType}
-                onChange={(e) => setIconType(e.target.value)}
+                onChange={(e) => setIconType(e.target.value as any)}
                 className="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-3.5 py-2 text-white text-sm focus:outline-none focus:border-amber-500"
               >
                 {ICON_OPTIONS.map((opt) => (

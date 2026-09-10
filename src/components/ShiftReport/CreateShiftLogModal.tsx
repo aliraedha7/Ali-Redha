@@ -40,7 +40,7 @@ const DEFAULT_PATROL_HALLS = [
   'محطة الطاقة والمرافق (POWER)'
 ];
 
-const DEFAULT_CHECKLIST = [
+const DEFAULT_CHECKLIST: NonNullable<ShiftLog['patrolChecklist']> = [
   { id: 'CHK-01', title: 'فحص استقرار ضغط خط الهواء الرئيسي والنيتروجين', area: 'محطة الخدمات', status: 'PASSED' as const, notes: '8.5 بار طبيعي' },
   { id: 'CHK-02', title: 'مراقبة سحب أبخرة المذيبات والتهوية بقاعة الروتو', area: 'قاعة الروتو', status: 'PASSED' as const, notes: 'سحب 100%' },
   { id: 'CHK-03', title: 'فحص حرارة محامل محركات السحب ودرافيل الطباعة', area: 'قاعة الفليكسو', status: 'PASSED' as const, notes: 'أقل من 45°C' },
@@ -116,7 +116,7 @@ export const CreateShiftLogModal: React.FC = () => {
   const [safetyIncidents, setSafetyIncidents] = useState<number>(0);
 
   // Checklist
-  const [checklist, setChecklist] = useState(DEFAULT_CHECKLIST);
+  const [checklist, setChecklist] = useState<NonNullable<ShiftLog['patrolChecklist']>>(DEFAULT_CHECKLIST);
   const [showAddChecklistForm, setShowAddChecklistForm] = useState(false);
   const [newCheckTitle, setNewCheckTitle] = useState('');
   const [newCheckArea, setNewCheckArea] = useState('قاعة الروتو (ROTO)');

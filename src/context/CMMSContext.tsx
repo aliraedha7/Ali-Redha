@@ -196,101 +196,84 @@ interface CMMSContextType {
   deleteConfirmation: DeleteConfirmationDialog | null;
   requestDeleteConfirmation: (dialog: Omit<DeleteConfirmationDialog, 'isOpen'>) => void;
   closeDeleteConfirmation: () => void;
+
+  // External PHP Hosting & Backup Utilities
+  isPhpConnected: boolean;
+  downloadPhpPackage: () => void;
+  exportDatabaseJson: () => void;
 }
 
 const CMMSContext = createContext<CMMSContextType | undefined>(undefined);
 
 const LOCAL_STORAGE_KEY_PREFIX = 'cmms_flex_pack_v2_';
 
-export const CMMSProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Load from local storage or fallback to seed data
-  const [hangars, setHangars] = useState<HangarInfo[]>(() => {
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY_PREFIX}hangars`);
+const loadInitialEntityState = <T,>(serverKey: string, storageKey: string, fallback: T): T => {
+  if (typeof window !== 'undefined') {
+    const serverData = (window as any).__INITIAL_CMMS_DATA__;
+    if (serverData && serverData[serverKey]) {
+      const val = serverData[serverKey];
+      if (Array.isArray(fallback)) {
+        if (Array.isArray(val) && val.length > 0) return val as T;
+      } else if (val !== undefined && val !== null) {
+        return val as T;
+      }
+    }
+    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY_PREFIX}${storageKey}`);
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(fallback)) {
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed as T;
+        } else if (parsed !== undefined && parsed !== null) {
+          return parsed as T;
+        }
       } catch (e) {
         console.error(e);
       }
     }
-    return HANGARS_DATA;
-  });
+  }
+  return fallback;
+};
 
-  const [assets, setAssets] = useState<Asset[]>(() => {
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY_PREFIX}assets`);
-    if (saved) {
-      try { return JSON.parse(saved); } catch (e) { console.error(e); }
-    }
-    return INITIAL_ASSETS;
-  });
+export const CMMSProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Load from server __INITIAL_CMMS_DATA__, local storage, or fallback to seed data
+  const [hangars, setHangars] = useState<HangarInfo[]>(() => 
+    loadInitialEntityState('hangars', 'hangars', HANGARS_DATA)
+  );
 
-  const [workOrders, setWorkOrders] = useState<WorkOrder[]>(() => {
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY_PREFIX}work_orders`);
-    if (saved) {
-      try { return JSON.parse(saved); } catch (e) { console.error(e); }
-    }
-    return INITIAL_WORK_ORDERS;
-  });
+  const [assets, setAssets] = useState<Asset[]>(() => 
+    loadInitialEntityState('assets', 'assets', INITIAL_ASSETS)
+  );
 
-  const [spareParts, setSpareParts] = useState<SparePart[]>(() => {
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY_PREFIX}spare_parts`);
-    if (saved) {
-      try { return JSON.parse(saved); } catch (e) { console.error(e); }
-    }
-    return INITIAL_SPARE_PARTS;
-  });
+  const [workOrders, setWorkOrders] = useState<WorkOrder[]>(() => 
+    loadInitialEntityState('work_orders', 'work_orders', INITIAL_WORK_ORDERS)
+  );
 
-  const [meterReadings, setMeterReadings] = useState<MeterReading[]>(() => {
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY_PREFIX}meter_readings`);
-    if (saved) {
-      try { return JSON.parse(saved); } catch (e) { console.error(e); }
-    }
-    return INITIAL_METER_READINGS;
-  });
+  const [spareParts, setSpareParts] = useState<SparePart[]>(() => 
+    loadInitialEntityState('spare_parts', 'spare_parts', INITIAL_SPARE_PARTS)
+  );
 
-  const [pmChecklist, setPmChecklist] = useState<PMChecklistItem[]>(() => {
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY_PREFIX}pm_checklist`);
-    if (saved) {
-      try { return JSON.parse(saved); } catch (e) { console.error(e); }
-    }
-    return INITIAL_PM_CHECKLIST;
-  });
+  const [meterReadings, setMeterReadings] = useState<MeterReading[]>(() => 
+    loadInitialEntityState('meter_readings', 'meter_readings', INITIAL_METER_READINGS)
+  );
+
+  const [pmChecklist, setPmChecklist] = useState<PMChecklistItem[]>(() => 
+    loadInitialEntityState('pm_checklist', 'pm_checklist', INITIAL_PM_CHECKLIST)
+  );
 
   // Dedicated Meters & Instrumentation State
-  const [meterDevices, setMeterDevices] = useState<MeterDevice[]>(() => {
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY_PREFIX}meter_devices`);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch (e) { console.error(e); }
-    }
-    return INITIAL_METER_DEVICES;
-  });
+  const [meterDevices, setMeterDevices] = useState<MeterDevice[]>(() => 
+    loadInitialEntityState('meter_devices', 'meter_devices', INITIAL_METER_DEVICES)
+  );
 
-  const [deviceReadingLogs, setDeviceReadingLogs] = useState<DeviceReadingLog[]>(() => {
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY_PREFIX}device_reading_logs`);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch (e) { console.error(e); }
-    }
-    return INITIAL_DEVICE_READINGS;
-  });
+  const [deviceReadingLogs, setDeviceReadingLogs] = useState<DeviceReadingLog[]>(() => 
+    loadInitialEntityState('device_reading_logs', 'device_reading_logs', INITIAL_DEVICE_READINGS)
+  );
 
   // Professional Preventive Maintenance Plans State
-  const [pmPlans, setPmPlans] = useState<PreventiveMaintenancePlan[]>(() => {
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY_PREFIX}pm_plans`);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch (e) { console.error(e); }
-    }
-    return INITIAL_PM_PLANS;
-  });
+  const [pmPlans, setPmPlans] = useState<PreventiveMaintenancePlan[]>(() => 
+    loadInitialEntityState('pm_plans', 'pm_plans', INITIAL_PM_PLANS)
+  );
 
   // UI state
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
@@ -322,18 +305,9 @@ export const CMMSProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [selectedPartDetail, setSelectedPartDetail] = useState<SparePart | null>(null);
 
   // User Accounts & Permissions State
-  const [users, setUsers] = useState<UserAccount[]>(() => {
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY_PREFIX}users`);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    return INITIAL_USERS;
-  });
+  const [users, setUsers] = useState<UserAccount[]>(() => 
+    loadInitialEntityState('users', 'users', INITIAL_USERS)
+  );
 
   // Clear any legacy persisted login state on mount so every visit starts unauthenticated
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -445,18 +419,9 @@ export const CMMSProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Shift Handover & Management State
-  const [shiftLogs, setShiftLogs] = useState<ShiftLog[]>(() => {
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY_PREFIX}shift_logs`);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    return INITIAL_SHIFT_LOGS;
-  });
+  const [shiftLogs, setShiftLogs] = useState<ShiftLog[]>(() => 
+    loadInitialEntityState('shift_logs', 'shift_logs', INITIAL_SHIFT_LOGS)
+  );
 
   const [activeShiftLogId, setActiveShiftLogId] = useState<string>(() => {
     return INITIAL_SHIFT_LOGS[0]?.id || 'SHIFT-2026-09-08-M';
@@ -483,49 +448,129 @@ export const CMMSProvider: React.FC<{ children: React.ReactNode }> = ({ children
     },
   ]);
 
-  // Sync to local storage
+  // External PHP Hosting & API Sync
+  const [isPhpConnected, setIsPhpConnected] = useState<boolean>(false);
+
+  const syncWithPhp = (entity: string, payload: any) => {
+    if (typeof window === 'undefined') return;
+    fetch(`api.php?action=sync_entity&entity=${entity}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    }).then(res => {
+      if (res.ok) setIsPhpConnected(true);
+    }).catch(() => {
+      // Non-blocking fallback
+    });
+  };
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      fetch('api.php?action=status')
+        .then(r => r.json())
+        .then(d => {
+          if (d && d.status === 'online') {
+            setIsPhpConnected(true);
+          }
+        })
+        .catch(() => {
+          setIsPhpConnected(false);
+        });
+    }
+  }, []);
+
+  const downloadPhpPackage = () => {
+    if (typeof window === 'undefined') return;
+    const link = document.createElement('a');
+    link.href = 'cmms_php_release.zip';
+    link.download = 'cmms_almorjan_php_package.zip';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const exportDatabaseJson = () => {
+    const fullData = {
+      hangars,
+      assets,
+      equipment: assets,
+      work_orders: workOrders,
+      spare_parts: spareParts,
+      meter_readings: meterReadings,
+      pm_checklist: pmChecklist,
+      meter_devices: meterDevices,
+      device_reading_logs: deviceReadingLogs,
+      pm_plans: pmPlans,
+      users,
+      shift_logs: shiftLogs,
+      exported_at: new Date().toISOString(),
+      system: 'CMMS Al-Morjan Packaging - Eng. Ali Redha'
+    };
+    const blob = new Blob([JSON.stringify(fullData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `almorjan_cmms_database_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  // Sync to local storage and PHP server
   useEffect(() => {
     localStorage.setItem(`${LOCAL_STORAGE_KEY_PREFIX}hangars`, JSON.stringify(hangars));
+    syncWithPhp('hangars', hangars);
   }, [hangars]);
 
   useEffect(() => {
     localStorage.setItem(`${LOCAL_STORAGE_KEY_PREFIX}assets`, JSON.stringify(assets));
+    syncWithPhp('assets', assets);
   }, [assets]);
 
   useEffect(() => {
     localStorage.setItem(`${LOCAL_STORAGE_KEY_PREFIX}work_orders`, JSON.stringify(workOrders));
+    syncWithPhp('work_orders', workOrders);
   }, [workOrders]);
 
   useEffect(() => {
     localStorage.setItem(`${LOCAL_STORAGE_KEY_PREFIX}spare_parts`, JSON.stringify(spareParts));
+    syncWithPhp('spare_parts', spareParts);
   }, [spareParts]);
 
   useEffect(() => {
     localStorage.setItem(`${LOCAL_STORAGE_KEY_PREFIX}meter_readings`, JSON.stringify(meterReadings));
+    syncWithPhp('meter_readings', meterReadings);
   }, [meterReadings]);
 
   useEffect(() => {
     localStorage.setItem(`${LOCAL_STORAGE_KEY_PREFIX}pm_checklist`, JSON.stringify(pmChecklist));
+    syncWithPhp('pm_checklist', pmChecklist);
   }, [pmChecklist]);
 
   useEffect(() => {
     localStorage.setItem(`${LOCAL_STORAGE_KEY_PREFIX}meter_devices`, JSON.stringify(meterDevices));
+    syncWithPhp('meter_devices', meterDevices);
   }, [meterDevices]);
 
   useEffect(() => {
     localStorage.setItem(`${LOCAL_STORAGE_KEY_PREFIX}device_reading_logs`, JSON.stringify(deviceReadingLogs));
+    syncWithPhp('device_reading_logs', deviceReadingLogs);
   }, [deviceReadingLogs]);
 
   useEffect(() => {
     localStorage.setItem(`${LOCAL_STORAGE_KEY_PREFIX}pm_plans`, JSON.stringify(pmPlans));
+    syncWithPhp('pm_plans', pmPlans);
   }, [pmPlans]);
 
   useEffect(() => {
     localStorage.setItem(`${LOCAL_STORAGE_KEY_PREFIX}users`, JSON.stringify(users));
+    syncWithPhp('users', users);
   }, [users]);
 
   useEffect(() => {
     localStorage.setItem(`${LOCAL_STORAGE_KEY_PREFIX}shift_logs`, JSON.stringify(shiftLogs));
+    syncWithPhp('shift_logs', shiftLogs);
   }, [shiftLogs]);
 
   // Permission Evaluation & Enforcement
@@ -662,7 +707,7 @@ export const CMMSProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (editingWorkOrder?.id === woId) {
       setEditingWorkOrder(null);
     }
-    addNotification(`تم حذف أمر العمل [${target?.code || target?.title || woId}] بنجاح`, 'info');
+    addNotification(`تم حذف أمر العمل [${(target as any)?.code || target?.id || target?.title || woId}] بنجاح`, 'info');
   };
 
   const deleteShiftLog = (shiftId: string) => {
@@ -1681,6 +1726,11 @@ export const CMMSProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsShiftModalOpen,
         editingShiftLog,
         setEditingShiftLog,
+
+        // External PHP Hosting & Backup
+        isPhpConnected,
+        downloadPhpPackage,
+        exportDatabaseJson,
       }}
     >
       {children}

@@ -16,7 +16,7 @@ const COMMON_PRESETS = [
   { name: 'معامل القدرة الكهربائي للمصنع (Power Factor)', category: 'UTILITY' as const, unit: 'Cos φ', targetRange: '0.92 - 0.98' },
   { name: 'درجة نقاوة ماء معالجة الـ RO ومياه الجلرات', category: 'UTILITY' as const, unit: 'TDS (ppm)', targetRange: '< 80 ppm' },
   { name: 'درجة حرارة زيت التروس لمحطة البثق PE', category: 'UTILITY' as const, unit: '°C', targetRange: '55 - 70 °C' },
-  { name: 'نسبة الأوكسجين في قاعة الأحبار', category: 'SAFETY' as const, unit: '%', targetRange: '19.5% - 21.5%' },
+  { name: 'نسبة الأوكسجين في قاعة الأحبار', category: 'AIR_QUALITY' as const, unit: '%', targetRange: '19.5% - 21.5%' },
 ];
 
 export const CustomEnvParamModal: React.FC<CustomEnvParamModalProps> = ({
@@ -26,7 +26,7 @@ export const CustomEnvParamModal: React.FC<CustomEnvParamModalProps> = ({
   initialParam,
 }) => {
   const [name, setName] = useState('');
-  const [category, setCategory] = useState<'ENVIRONMENTAL' | 'UTILITY' | 'SAFETY'>('ENVIRONMENTAL');
+  const [category, setCategory] = useState<NonNullable<CustomEnvironmentalParam['category']>>('ENVIRONMENTAL');
   const [value, setValue] = useState<string>('24');
   const [unit, setUnit] = useState('°C');
   const [targetRange, setTargetRange] = useState('');
@@ -70,7 +70,7 @@ export const CustomEnvParamModal: React.FC<CustomEnvParamModalProps> = ({
       id: initialParam?.id || `PARAM-${Date.now().toString(36).toUpperCase()}`,
       name: name.trim(),
       category,
-      value: isNaN(Number(value)) ? value.trim() : Number(value),
+      value: isNaN(Number(value)) ? 0 : Number(value),
       unit: unit.trim(),
       targetRange: targetRange.trim() || undefined,
       status,

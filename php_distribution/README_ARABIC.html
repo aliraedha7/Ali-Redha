@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <title>دليل رفع واستضافة نظام إدارة الصيانة (CMMS) لمعمل المرجان</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: #0f172a;
+      color: #f1f5f9;
+      line-height: 1.8;
+      padding: 40px 20px;
+      margin: 0;
+    }
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+    h1 { color: #38bdf8; font-size: 26px; border-bottom: 2px solid #334155; padding-bottom: 14px; margin-top: 0; }
+    h2 { color: #34d399; font-size: 20px; margin-top: 28px; }
+    .badge {
+      display: inline-block;
+      background: #065f46;
+      color: #6ee7b7;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .step {
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 18px;
+      margin: 16px 0;
+    }
+    .step-num {
+      background: #2563eb;
+      color: white;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-family: 'JetBrains Mono', monospace;
+      margin-left: 8px;
+    }
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      background: #020617;
+      color: #f59e0b;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+    ul { padding-right: 20px; }
+    li { margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <span class="badge">جاهز للاستضافة 100% — PHP 7.4 / 8.x</span>
+    <h1>دليل رفع وتشغيل نظام CMMS معمل المرجان على الاستضافة الخارجية</h1>
+    <p>تم تجهيز هذه الحزمة خصيصاً لتعمل مباشرة على أي استضافة تدعم PHP (مثل cPanel، Hostinger، Apache، LiteSpeed، Nginx أو XAMPP المحلي) دون الحاجة لتثبيت Node.js أو Vite على السيرفر الخارجي.</p>
+
+    <h2>محتويات الحزمة:</h2>
+    <ul>
+      <li><code>index.php</code>: الملف الرئيسي الذي يقوم بتحميل الواجهة المتطورة وتلقين البيانات المخزنة فوراً.</li>
+      <li><code>api.php</code>: واجهة البرمجة (REST API) لحفظ التعديلات، أوامر العمل، والعدادات تلقائياً.</li>
+      <li><code>data_store.json</code>: قاعدة البيانات الشاملة (41 ماكينة، 9 صالات، 12 جهاز قياس، 8 خطط صيانة، 11 صنف قطع غيار).</li>
+      <li><code>assets/</code>: ملفات JavaScript و CSS المجمعة بأعلى كفاءة وسرعة.</li>
+      <li><code>.htaccess</code>: ملف إعدادات خادم Apache لضغط البيانات وتفعيل التوجيه التلقائي.</li>
+    </ul>
+
+    <h2>خطوات الرفع على cPanel (خلال دقيقتين):</h2>
+    <div class="step">
+      <span class="step-num">1</span>
+      <strong>تسجيل الدخول إلى لوحة تحكم الاستضافة:</strong>
+      <p>ادخل إلى cPanel أو لوحة تحكم استضافتك وافتح <strong>File Manager (إدارة الملفات)</strong>.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-num">2</span>
+      <strong>الانتقال إلى المجلد العام للموقع:</strong>
+      <p>افتح مجلد <code>public_html</code> (أو مجلد فرعي إذا أردت تشغيله في مسار مثل <code>cmms/</code>).</p>
+    </div>
+
+    <div class="step">
+      <span class="step-num">3</span>
+      <strong>رفع الملفات وفك الضغط:</strong>
+      <p>ارفع ملف <code>cmms_almorjan_php_package.zip</code>، ثم اضغط عليه بالزر الأيمن واختر <strong>Extract (فك الضغط)</strong>.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-num">4</span>
+      <strong>التأكد من الصلاحيات والتشغيل:</strong>
+      <p>تأكد من أن ملف <code>data_store.json</code> يحمل صلاحية كتابة (Permission 644 أو 666) حتى يتمكن خادم PHP من حفظ التعديلات وأوامر العمل الجديدة.</p>
+      <p>افتح رابط موقعك ومبروك! سيعمل النظام بكامل مميزاته ورسوماته التفاعلية فوراً.</p>
+    </div>
+
+    <h2>التشغيل المحلي عبر XAMPP أو سطر الأوامر:</h2>
+    <p>إذا أردت تشغيله محلياً عبر سطر الأوامر:</p>
+    <code>php -S localhost:8000</code>
+    <p>ثم افتح المتصفح على <code>http://localhost:8000</code>.</p>
+  </div>
+</body>
+</html>

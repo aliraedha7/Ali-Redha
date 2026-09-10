@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, Component, ErrorInfo, ReactNode } from 'react';
 import { CMMSProvider, useCMMS } from './context/CMMSContext';
 import { Navbar } from './components/Navbar';
 import { Dashboard } from './components/Dashboard/Dashboard';
@@ -23,6 +23,56 @@ import { PermissionWarningModal } from './components/Developer/PermissionWarning
 import { LoginModal } from './components/Auth/LoginModal';
 import { ConfirmDeleteModal } from './components/Common/ConfirmDeleteModal';
 import { HangarId } from './types';
+import { AlertTriangle, RefreshCw } from 'lucide-react';
+
+interface ErrorBoundaryProps {
+  children: ReactNode;
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error: Error | null;
+}
+
+class TabErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  public state: ErrorBoundaryState = { hasError: false, error: null };
+
+  constructor(props: ErrorBoundaryProps) {
+    super(props);
+  }
+
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('Tab render error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="p-8 rounded-2xl bg-[#1e293b] border border-amber-500/40 text-center space-y-4 font-sans text-slate-200 my-4 shadow-xl">
+          <AlertTriangle className="w-12 h-12 text-amber-400 mx-auto" />
+          <h3 className="text-lg font-bold text-white">تنبيه: حدث خطأ غير متوقع أثناء عرض هذا التقرير</h3>
+          <p className="text-xs text-slate-400 max-w-md mx-auto">
+            {this.state.error?.message || 'تم حماية الواجهة من الانهيار. اضغط على الزر أدناه لإعادة تحميل التقرير بسلاسة.'}
+          </p>
+          <div className="flex flex-wrap justify-center gap-3 pt-2">
+            <button
+              onClick={() => this.setState({ hasError: false, error: null })}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-2"
+            >
+              <RefreshCw className="w-4 h-4" />
+              <span>إعادة المحاولة الآن</span>
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 const CMMSMainContent: React.FC = () => {
   const { activeTab, setActiveTab } = useCMMS();
@@ -40,37 +90,39 @@ const CMMSMainContent: React.FC = () => {
 
       {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
-        {activeTab === 'dashboard' && (
-          <Dashboard onSelectHangar={handleSelectHangar} />
-        )}
+        <TabErrorBoundary>
+          {activeTab === 'dashboard' && (
+            <Dashboard onSelectHangar={handleSelectHangar} />
+          )}
 
-        {activeTab === 'assets' && (
-          <AssetList initialHangarFilter={selectedHangarFilter} />
-        )}
+          {activeTab === 'assets' && (
+            <AssetList initialHangarFilter={selectedHangarFilter} />
+          )}
 
-        {activeTab === 'work-orders' && (
-          <WorkOrdersManager />
-        )}
+          {activeTab === 'work-orders' && (
+            <WorkOrdersManager />
+          )}
 
-        {activeTab === 'meters' && (
-          <MetersManager />
-        )}
+          {activeTab === 'meters' && (
+            <MetersManager />
+          )}
 
-        {activeTab === 'preventive' && (
-          <PreventiveMaintenanceManager />
-        )}
+          {activeTab === 'preventive' && (
+            <PreventiveMaintenanceManager />
+          )}
 
-        {activeTab === 'warehouse' && (
-          <WarehouseManager />
-        )}
+          {activeTab === 'warehouse' && (
+            <WarehouseManager />
+          )}
 
-        {activeTab === 'shift-report' && (
-          <ShiftReportView />
-        )}
+          {activeTab === 'shift-report' && (
+            <ShiftReportView />
+          )}
 
-        {activeTab === 'developer-hub' && (
-          <DeveloperHub />
-        )}
+          {activeTab === 'developer-hub' && (
+            <DeveloperHub />
+          )}
+        </TabErrorBoundary>
       </main>
 
       {/* Footer */}
